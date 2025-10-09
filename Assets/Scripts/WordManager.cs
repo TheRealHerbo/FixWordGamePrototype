@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 using UnityEngine.UI;
 
 public class WordManager : MonoBehaviour
@@ -15,6 +16,7 @@ public class WordManager : MonoBehaviour
     public Image wordImage;
     public Transform letterParent;
     public GameObject letterTilePrefab;
+    public GameObject letterSlotPrefab;
 
     private string currentWord;
     private List<LetterTile> currentTiles = new List<LetterTile>();
@@ -29,8 +31,10 @@ public class WordManager : MonoBehaviour
     {
         if (currentIndex >= words.Count) currentIndex = 0;
 
+        // remove old slots/tiles
         foreach (Transform child in letterParent)
             Destroy(child.gameObject);
+        currentTiles.Clear();
 
         WordData w = words[currentIndex];
         currentWord = w.word.ToUpper();
@@ -41,8 +45,37 @@ public class WordManager : MonoBehaviour
 
         foreach (char c in scrambled)
         {
-            GameObject tile = Instantiate(letterTilePrefab, letterParent);
+            GameObject slot = Instantiate(letterSlotPrefab, letterParent);
+
+            RectTransform slotRt = slot.GetComponent<RectTransform>();
+            if (slotRt != null)
+            {
+                slotRt.anchoredPosition = Vector2.zero;
+            }
+            else
+            {
+                slot.transform.localPosition = Vector3.zero;
+            }
+
+            GameObject tile = Instantiate(letterTilePrefab, slot.transform);
+
+            RectTransform tileRt = tile.GetComponent<RectTransform>();
+            if (tileRt != null)
+            {
+                tileRt.anchoredPosition = Vector2.zero;
+            }
+            else
+            {
+                tile.transform.localPosition = Vector3.zero;
+            }
+
             LetterTile lt = tile.GetComponent<LetterTile>();
+            if (lt == null)
+            {
+                Debug.LogError($"WordManager: prefab '{letterTilePrefab.name}' does not have a LetterTile component attached.");
+                continue;
+            }
+
             lt.Setup(c, this);
             currentTiles.Add(lt);
         }
@@ -55,9 +88,14 @@ public class WordManager : MonoBehaviour
         string result = "";
         foreach (Transform child in letterParent)
         {
-            LetterTile tile = child.GetComponent<LetterTile>();
+            // child is the slot; find the tile inside it
+            LetterTile tile = child.GetComponentInChildren<LetterTile>();
+            if (tile == null) continue;
             result += tile.letterChar;
         }
+
+        Debug.Log("Player Answer: " + result);
+
         return result;
     }
 
@@ -89,4 +127,3 @@ public static class Extensions
         }
     }
 }
-
