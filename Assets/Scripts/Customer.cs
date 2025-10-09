@@ -4,31 +4,21 @@ using TMPro;
 
 public class Customer : MonoBehaviour
 {
-    public int maxHealth = 100;
-    public int currentHealth;
-    public Slider healthBar;
+    public int done = 100;
+    public int currentProgress;
     public TextMeshProUGUI feedbackText;
 
     void Start()
     {
-        currentHealth = maxHealth;
-        UpdateUI();
+        currentProgress = 0;
     }
 
-    public void TakeDamage(int amount)
+    public void ProgressTool(int amount)
     {
-        currentHealth -= amount;
-        if (currentHealth < 0) currentHealth = 0;
-        UpdateUI();
+        currentProgress += amount;
 
-        feedbackText.text = "Enemy takes " + amount + " damage!";
 
-        if (currentHealth == 0)
-            feedbackText.text = "Enemy defeated!";
-    }
-
-    private void UpdateUI()
-    {
-        healthBar.value = (float)currentHealth / maxHealth;
+        if (currentProgress >= 100)
+            feedbackText.text = "Thank you!";
     }
 }
